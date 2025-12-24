@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Whiskey, Review, UserProfile, WhiskeyFilters, SortOption } from '@/lib/types'
 import { whiskeyService } from '@/lib/whiskeyService'
+import { generateId } from '@/lib/utils'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -56,10 +57,6 @@ function App() {
     }
     loadWhiskeys()
   }, [])
-
-  const generateId = () => {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2)
-  }
 
   const handleSetNickname = (nickname: string) => {
     const newProfile: UserProfile = {

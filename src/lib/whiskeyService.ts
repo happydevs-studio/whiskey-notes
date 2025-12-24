@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
 import { Whiskey } from './types'
+import { generateId } from './utils'
 
 export const whiskeyService = {
   // Fetch all whiskeys from Supabase
@@ -27,7 +28,7 @@ export const whiskeyService = {
     try {
       const newWhiskey = {
         ...whiskey,
-        id: Date.now().toString(36) + Math.random().toString(36).substr(2),
+        id: generateId(),
         createdAt: Date.now()
       }
 
