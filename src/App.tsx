@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Whiskey, Review, UserProfile, WhiskeyFilters, SortOption } from '@/lib/types'
+import { whiskeyService } from '@/lib/whiskeyService'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,7 +16,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { toast } from 'sonner'
 
 function App() {
-  const [whiskeys = [], setWhiskeys] = useKV<Whiskey[]>('whiskeys', [])
+  const [whiskeys, setWhiskeys] = useState<Whiskey[]>([])
+  const [loading, setLoading] = useState(true)
   const [reviews = [], setReviews] = useKV<Review[]>('reviews', [])
   const [userProfile, setUserProfile] = useKV<UserProfile | null>('userProfile', null)
   const [isAdmin, setIsAdmin] = useState(false)
@@ -44,6 +46,17 @@ function App() {
     checkAdmin()
   }, [])
 
+  // Fetch whiskeys from Supabase on mount
+  useEffect(() => {
+    const loadWhiskeys = async () => {
+      setLoading(true)
+      const fetchedWhiskeys = await whiskeyService.fetchWhiskeys()
+      setWhiskeys(fetchedWhiskeys)
+      setLoading(false)
+    }
+    loadWhiskeys()
+  }, [])
+
   const generateId = () => {
     return Date.now().toString(36) + Math.random().toString(36).substr(2)
   }
@@ -59,14 +72,14 @@ function App() {
     toast.success(`Welcome, ${nickname}!`)
   }
 
-  const handleAddWhiskey = (whiskeyData: Omit<Whiskey, 'id' | 'createdAt'>) => {
-    const newWhiskey: Whiskey = {
-      ...whiskeyData,
-      id: generateId(),
-      createdAt: Date.now()
+  const handleAddWhiskey = async (whiskeyData: Omit<Whiskey, 'id' | 'createdAt'>) => {
+    const newWhiskey = await whiskeyService.addWhiskey(whiskeyData)
+    if (newWhiskey) {
+      setWhiskeys((current) => [newWhiskey, ...current])
+      toast.success(`${whiskeyData.name} added successfully!`)
+    } else {
+      toast.error('Failed to add whiskey. Please try again.')
     }
-    setWhiskeys((current = []) => [...current, newWhiskey])
-    toast.success(`${whiskeyData.name} added successfully!`)
   }
 
   const handleAddReview = (rating: number, notes: string) => {
@@ -294,7 +307,11 @@ function App() {
                   </Sheet>
                 </div>
 
-                {filteredAndSortedWhiskeys.length === 0 ? (
+                {loading ? (
+                  <div className="text-center py-16">
+                    <p className="text-muted-foreground">Loading whiskeys...</p>
+                  </div>
+                ) : filteredAndSortedWhiskeys.length === 0 ? (
                   <div className="text-center py-16">
                     <p className="text-muted-foreground mb-4">
                       {whiskeys.length === 0
@@ -380,7 +397,11 @@ function App() {
                   </Sheet>
                 </div>
 
-                {filteredAndSortedWhiskeys.length === 0 ? (
+                {loading ? (
+                  <div className="text-center py-16">
+                    <p className="text-muted-foreground">Loading whiskeys...</p>
+                  </div>
+                ) : filteredAndSortedWhiskeys.length === 0 ? (
                   <div className="text-center py-16">
                     <p className="text-muted-foreground mb-4">
                       {userProfile?.tried.length === 0
@@ -461,7 +482,11 @@ function App() {
                   </Sheet>
                 </div>
 
-                {filteredAndSortedWhiskeys.length === 0 ? (
+                {loading ? (
+                  <div className="text-center py-16">
+                    <p className="text-muted-foreground">Loading whiskeys...</p>
+                  </div>
+                ) : filteredAndSortedWhiskeys.length === 0 ? (
                   <div className="text-center py-16">
                     <p className="text-muted-foreground mb-4">
                       {userProfile?.wishlist.length === 0
