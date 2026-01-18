@@ -73,8 +73,21 @@
 
 body {
   font-family: var(--font-sans);
+  background: linear-gradient(135deg, oklch(0.97 0.015 50) 0%, oklch(0.95 0.02 45) 100%);
+  min-height: 100vh;
 }
 
 h1, h2, h3 {
   font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
 }
