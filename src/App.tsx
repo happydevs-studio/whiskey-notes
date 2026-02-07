@@ -67,7 +67,7 @@ function App() {
       setReviews(reviewsWithTimestamps)
       setHasInitialized(true)
     }
-  }, [whiskeys.length, reviews.length, hasInitialized, setWhiskeys, setReviews])
+  }, [whiskeys.length, reviews.length, hasInitialized])
 
   const generateId = () => {
     return Date.now().toString(36) + Math.random().toString(36).substr(2)
