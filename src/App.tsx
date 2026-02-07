@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Whiskey, Review, UserProfile, WhiskeyFilters, SortOption } from '@/lib/types'
+import { sampleWhiskeys, sampleReviews } from '@/lib/sampleData'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -19,6 +20,7 @@ function App() {
   const [reviews = [], setReviews] = useKV<Review[]>('reviews', [])
   const [userProfile, setUserProfile] = useKV<UserProfile | null>('userProfile', null)
   const [isAdmin, setIsAdmin] = useState(false)
+  const [hasInitialized, setHasInitialized] = useState(false)
 
   const [selectedWhiskey, setSelectedWhiskey] = useState<Whiskey | null>(null)
   const [detailOpen, setDetailOpen] = useState(false)
@@ -43,6 +45,29 @@ function App() {
     }
     checkAdmin()
   }, [])
+
+  // Initialize with sample data if the database is empty
+  useEffect(() => {
+    if (!hasInitialized && whiskeys.length === 0 && reviews.length === 0) {
+      const now = Date.now()
+      
+      // Add timestamps to sample whiskeys
+      const whiskeyWithTimestamps: Whiskey[] = sampleWhiskeys.map((whiskey, index) => ({
+        ...whiskey,
+        createdAt: now - (sampleWhiskeys.length - index) * 86400000 // Stagger by days
+      }))
+      
+      // Add timestamps to sample reviews
+      const reviewsWithTimestamps: Review[] = sampleReviews.map((review, index) => ({
+        ...review,
+        createdAt: now - (sampleReviews.length - index) * 3600000 // Stagger by hours
+      }))
+      
+      setWhiskeys(whiskeyWithTimestamps)
+      setReviews(reviewsWithTimestamps)
+      setHasInitialized(true)
+    }
+  }, [whiskeys.length, reviews.length, hasInitialized])
 
   const generateId = () => {
     return Date.now().toString(36) + Math.random().toString(36).substr(2)
