@@ -20,6 +20,7 @@ function App() {
   const [reviews = [], setReviews] = useKV<Review[]>('reviews', [])
   const [userProfile, setUserProfile] = useKV<UserProfile | null>('userProfile', null)
   const [isAdmin, setIsAdmin] = useState(false)
+  const [hasInitialized, setHasInitialized] = useState(false)
 
   const [selectedWhiskey, setSelectedWhiskey] = useState<Whiskey | null>(null)
   const [detailOpen, setDetailOpen] = useState(false)
@@ -47,7 +48,7 @@ function App() {
 
   // Initialize with sample data if the database is empty
   useEffect(() => {
-    if (whiskeys.length === 0 && reviews.length === 0) {
+    if (!hasInitialized && whiskeys.length === 0 && reviews.length === 0) {
       const now = Date.now()
       
       // Add timestamps to sample whiskeys
@@ -64,9 +65,9 @@ function App() {
       
       setWhiskeys(whiskeyWithTimestamps)
       setReviews(reviewsWithTimestamps)
+      setHasInitialized(true)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // Run once on mount - intentionally not including whiskeys/reviews to avoid re-initialization
+  }, [whiskeys.length, reviews.length, hasInitialized, setWhiskeys, setReviews])
 
   const generateId = () => {
     return Date.now().toString(36) + Math.random().toString(36).substr(2)
