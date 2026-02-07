@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Whiskey, Review, UserProfile, WhiskeyFilters, SortOption } from '@/lib/types'
+import { sampleWhiskeys, sampleReviews } from '@/lib/sampleData'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -43,6 +44,28 @@ function App() {
     }
     checkAdmin()
   }, [])
+
+  // Initialize with sample data if the database is empty
+  useEffect(() => {
+    if (whiskeys.length === 0 && reviews.length === 0) {
+      const now = Date.now()
+      
+      // Add timestamps to sample whiskeys
+      const whiskeyWithTimestamps: Whiskey[] = sampleWhiskeys.map((whiskey, index) => ({
+        ...whiskey,
+        createdAt: now - (sampleWhiskeys.length - index) * 86400000 // Stagger by days
+      }))
+      
+      // Add timestamps to sample reviews
+      const reviewsWithTimestamps: Review[] = sampleReviews.map((review, index) => ({
+        ...review,
+        createdAt: now - (sampleReviews.length - index) * 3600000 // Stagger by hours
+      }))
+      
+      setWhiskeys(whiskeyWithTimestamps)
+      setReviews(reviewsWithTimestamps)
+    }
+  }, []) // Run once on mount
 
   const generateId = () => {
     return Date.now().toString(36) + Math.random().toString(36).substr(2)
