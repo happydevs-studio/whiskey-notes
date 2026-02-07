@@ -65,7 +65,8 @@ function App() {
       setWhiskeys(whiskeyWithTimestamps)
       setReviews(reviewsWithTimestamps)
     }
-  }, []) // Run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Run once on mount - intentionally not including whiskeys/reviews to avoid re-initialization
 
   const generateId = () => {
     return Date.now().toString(36) + Math.random().toString(36).substr(2)
